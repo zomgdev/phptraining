@@ -1,0 +1,57 @@
+services:
+  nginx:
+#    image: zomgdev/nginx
+    image: nginx:latest
+#    build:
+#      context: frontend
+#      dockerfile: nginx.dockerfile
+    ports:
+      - "8081:80"
+    volumes:
+      - ./docker/nginx/sites-enabled:/etc/nginx/conf.d
+      - ./frontend:/opt/front
+      - ./chirper:/opt/chirper
+      #- ./logs:/var/log/nginx
+ #     - type: bind
+ #       source: /Users/michaelikus/wrk/phptraining/001/frontend
+ #       target: /opt/front
+ #     - type: bind
+ #       source: /Users/michaelikus/wrk/phptraining/001/backend
+ #       target: /opt/back
+ #     - type: bind
+ #       source: /Users/michaelikus/wrk/phptraining/001/docker/nginx/sites-enabled
+ #       target: /etc/nginx/sites-enabled
+    logging:
+      options:
+        max-size: 200m
+
+  php82-fpm:
+    image: zomgdev/php82-fpm
+    build:
+#      context: backend
+      dockerfile: ./php82-fpm.dockerfile
+#    ports:
+#      - "9082:9000"
+    volumes:
+      - ./frontend:/opt/front
+      - ./chirper:/opt/chirper
+    logging:
+      options:
+        max-size: 200m
+
+  postgresql16:
+    image: postgres:16.1-bullseye
+    environment:
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_USER: fox
+      POSTGRES_DB: laravel
+      PGDATA: /var/lib/postgresql/16.1/main/
+    ports:
+      - 5432:5432
+    volumes:
+      - ./docker/db-data:/var/lib/postgresql/16.1/main/
+#    healthcheck:
+#      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
